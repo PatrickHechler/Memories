@@ -454,7 +454,7 @@ public class MemoryList implements Runnable {
 			if (cd == null) {
 				this.out.println("[" + i + "]: title: " + mem.getTitle());
 			} else {
-				this.out.println("[" + i + "]: title: " + mem.getTitle() + "   created: " + cd.toInstant().toString());
+				printDate("[" + i + "]: title: " + mem.getTitle() + " created: ", mem.getCreateDate());
 			}
 		}
 	}
