@@ -163,6 +163,7 @@ public class MemoryList implements Runnable {
 			mem.setFinishDate(date ? Calendar.getInstance() : null);
 		}
 		mem.setFinished(finish);
+		this.memories = new TreeSet<>(this.memories);
 	}
 	
 	private void lines() {
@@ -189,6 +190,7 @@ public class MemoryList implements Runnable {
 			mod |= addLines.length != 0;
 			if (mod) {
 				mem.setLastModDate(Calendar.getInstance());
+				this.memories = new TreeSet<>(this.memories);
 			}
 		}
 	}
