@@ -125,10 +125,10 @@ public class MemoryList implements Runnable {
 				lines();
 				break;
 			case "finish":
-				finish(true, "date".equalsIgnoreCase(this.in.next()));
+				finish(true);
 				break;
 			case "unfinish":
-				finish(false, "date".equalsIgnoreCase(this.in.next()));
+				finish(false);
 				break;
 			case "help":
 				help();
@@ -146,16 +146,20 @@ public class MemoryList implements Runnable {
 		}
 	}
 	
-	private void finish(boolean date, boolean finish) {
-		Memory mem = readMemFromIndex();
+	private void finish(boolean finish) {
+		String dateStr = this.in.next();
+		boolean date = "date".equalsIgnoreCase(dateStr);
+		int index = date ? this.in.nextInt() : Integer.parseInt(dateStr);
+		Iterator <Memory> iter = this.memories.iterator();
+		Memory mem = readMemFromIndex(iter, index);
 		String title = this.in.next();
 		if ( !title.equals(mem.getTitle())) {
 			String msg = "wron title: assertet: " + title + " memt-title: " + mem.getTitle();
 			this.out.println(msg);
 			throw new ActException(msg);
 		}
-		if (date) {
-			mem.setFinishDate(finish ? Calendar.getInstance() : null);
+		if (finish) {
+			mem.setFinishDate(date ? Calendar.getInstance() : null);
 		}
 		mem.setFinished(finish);
 	}
