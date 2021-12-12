@@ -104,7 +104,11 @@ public class MemoryList implements Runnable {
 				if ( !this.saved) {
 					this.out.println("are you sure?");
 					this.out.println("you have unsaved changes.");
-					this.out.println("repeat exit to exit");
+					this.out.println("I have set the saved flag,");
+					this.out.println("so you can repeat 'exit' to exit");
+					this.out.println("if you do not want to exit");
+					this.out.println("you can type any other command");
+					this.out.println("(which will be executed)");
 					this.saved = true;
 					act();
 					return;

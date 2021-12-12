@@ -14,12 +14,12 @@ public class DefaultMemoryComparator implements Serializable, Comparator <Memory
 	private DefaultMemoryComparator() {}
 	
 	public int compare(Memory a, Memory b) {
-		int cmp = defaultCompare(a.getFinishDate(), b.getFinishDate());
+		int cmp = compare(a.getFinishDate(), b.getFinishDate());
 		if (cmp == 0) {
-			cmp = defaultCompare(a.getLastModDate(), b.getLastModDate());
+			cmp = compare(a.getLastModDate(), b.getLastModDate());
 		}
 		if (cmp == 0) {
-			cmp = defaultCompare(a.getCreateDate(), b.getCreateDate());
+			cmp = compare(a.getCreateDate(), b.getCreateDate());
 		}
 		if (cmp == 0) {
 			cmp = a.getTitle().compareTo(b.getTitle());
@@ -27,7 +27,7 @@ public class DefaultMemoryComparator implements Serializable, Comparator <Memory
 		return cmp;
 	}
 	
-	private static int defaultCompare(Calendar ac, Calendar bc) {
+	private static int compare(Calendar ac, Calendar bc) {
 		int cmp;
 		if (ac != null) {
 			if (bc != null) {
