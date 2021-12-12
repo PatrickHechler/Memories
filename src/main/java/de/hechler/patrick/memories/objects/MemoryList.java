@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +29,6 @@ import de.hechler.patrick.zeugs.NumberConvert;
 import de.hechler.patrick.zeugs.objects.QuedReaderable;
 
 public class MemoryList implements Runnable {
-	
-	private static final Comparator <Memory> DEFAULT_COMPARATOR = DefaultMemoryComparator.INSTANCE;
 	
 	private volatile boolean      saved;
 	private volatile boolean      exit;
@@ -64,7 +61,7 @@ public class MemoryList implements Runnable {
 		this.out = out;
 		this.reader = new QuedReaderable(0);
 		this.in = new Scanner(this.reader);
-		this.memories = new TreeSet <>(DEFAULT_COMPARATOR);
+		this.memories = new TreeSet <>();
 	}
 	
 	

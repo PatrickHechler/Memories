@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class Memory implements Serializable {
+public class Memory implements Serializable, Comparable <Memory> {
 	
 	/** UID */
 	private static final long serialVersionUID = -8960325510104304615L;
@@ -135,6 +135,11 @@ public class Memory implements Serializable {
 	
 	public void removeAllLinks() {
 		links.clear();
+	}
+
+	@Override
+	public int compareTo(Memory other) {
+		return DefaultMemoryComparator.INSTANCE.compare(this, other);
 	}
 	
 }
