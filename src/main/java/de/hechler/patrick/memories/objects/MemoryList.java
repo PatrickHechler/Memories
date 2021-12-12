@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -248,7 +249,7 @@ public class MemoryList implements Runnable {
 		this.out.println("<EMPTY_LINE>");
 		this.out.println("  to add/set the value-lines of the memory with the given title");
 		this.out.println("print");
-		this.out.println("  to show all memor< titles with there index");
+		this.out.println("  to show all memory titles with there index");
 		this.out.println("exit");
 		this.out.println("  to stop running");
 	}
@@ -301,8 +302,18 @@ public class MemoryList implements Runnable {
 		if (cal == null) {
 			this.out.println(prefix + "none set");
 		} else {
-			this.out.println(prefix + cal);
+			this.out.println(prefix + calGetTos(cal, Calendar.DAY_OF_MONTH, 0, 2) + '.' + calGetTos(cal, Calendar.MONTH, 1, 2) + '.' + calGetTos(cal, Calendar.YEAR, 0, 4) + '-'
+				+ calGetTos(cal, Calendar.HOUR_OF_DAY, 0, 2) + ':' + calGetTos(cal, Calendar.MINUTE, 0, 2) + ':' + calGetTos(cal, Calendar.SECOND, 0, 2) + ':'
+				+ calGetTos(cal, Calendar.MILLISECOND, 0, 3));
 		}
+	}
+	
+	private String calGetTos(Calendar cal, int index, int add, int len) {
+		int value = cal.get(index) + add;
+		StringBuilder b = new StringBuilder().append(value);
+		char[] chars = new char[len - b.length()];
+		Arrays.fill(chars, '0');
+		return b.append(chars).toString();
 	}
 	
 	private static final int SAVE_START_MAGIG = 0x8F47A51D;
