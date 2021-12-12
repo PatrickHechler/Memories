@@ -33,11 +33,12 @@ public class MemoryList implements Runnable {
 	
 	private static final Comparator <Memory> DEFAULT_COMPARATOR = DefaultMemoryComparator.INSTANCE;
 	
-	private volatile boolean     exit;
-	private PrintStream          out;
-	private final QuedReaderable reader;
-	private final Scanner        in;
-	private Set <Memory>         memories;
+	private volatile boolean      saved;
+	private volatile boolean      exit;
+	private volatile PrintStream  out;
+	private final QuedReaderable  reader;
+	private final Scanner         in;
+	private volatile Set <Memory> memories;
 	
 	
 	
@@ -58,6 +59,7 @@ public class MemoryList implements Runnable {
 	}
 	
 	public MemoryList(PrintStream out) {
+		this.saved = true;
 		this.exit = false;
 		this.out = out;
 		this.reader = new QuedReaderable(0);
@@ -102,6 +104,14 @@ public class MemoryList implements Runnable {
 		try {
 			switch (str.toLowerCase()) {
 			case "exit":
+				if ( !this.saved) {
+					this.out.println("are you sure?");
+					this.out.println("you have unsaved changes.");
+					this.out.println("repeat exit to exit");
+					this.saved = true;
+					act();
+					return;
+				}
 				this.exit = true;
 				return;
 			case "print":
@@ -163,7 +173,7 @@ public class MemoryList implements Runnable {
 			mem.setFinishDate(date ? Calendar.getInstance() : null);
 		}
 		mem.setFinished(finish);
-		this.memories = new TreeSet<>(this.memories);
+		this.memories = new TreeSet <>(this.memories);
 	}
 	
 	private void lines() {
@@ -179,7 +189,9 @@ public class MemoryList implements Runnable {
 		case "add":
 			String[] oldLines = mem.getLines();
 			List <String> addLinesList = new ArrayList <>();
-			for (String line = this.in.nextLine(); !line.isEmpty(); line = this.in.nextLine()) {
+			String line = this.in.nextLine();
+			if (line.isEmpty()) line = this.in.nextLine();
+			for (; !line.isEmpty(); line = this.in.nextLine()) {
 				addLinesList.add(line);
 			}
 			String[] addLines = addLinesList.toArray(new String[addLinesList.size()]);
@@ -190,7 +202,8 @@ public class MemoryList implements Runnable {
 			mod |= addLines.length != 0;
 			if (mod) {
 				mem.setLastModDate(Calendar.getInstance());
-				this.memories = new TreeSet<>(this.memories);
+				this.memories = new TreeSet <>(this.memories);
+				this.saved = false;
 			}
 		}
 	}
@@ -397,6 +410,7 @@ public class MemoryList implements Runnable {
 				throw new IllegalStateException("force is not set!");
 			}
 		}
+		this.saved = true;
 	}
 	
 	private void save() throws FileNotFoundException, IOException {
@@ -444,6 +458,7 @@ public class MemoryList implements Runnable {
 			objout.writeObject(this.memories);
 			objout.write(NumberConvert.intToByteArr(SAVE_END_MAGIG));
 		}
+		this.saved = true;
 	}
 	
 	private void print() {
@@ -454,7 +469,7 @@ public class MemoryList implements Runnable {
 			if (cd == null) {
 				this.out.println("[" + i + "]: title: " + mem.getTitle());
 			} else {
-				printDate("[" + i + "]: title: " + mem.getTitle() + " created: ", mem.getCreateDate());
+				printDate("[" + i + "]: title: " + mem.getTitle() + " created: ", cd);
 			}
 		}
 	}
@@ -475,6 +490,7 @@ public class MemoryList implements Runnable {
 		Calendar now = Calendar.getInstance();
 		Memory mem = new Memory(title, lines.toArray(new String[lines.size()]), now);
 		this.memories.add(mem);
+		this.saved = false;
 	}
 	
 	private void remove() {
@@ -487,6 +503,7 @@ public class MemoryList implements Runnable {
 			throw new AssertionError("the memory at the index " + index + " has not the title " + title);
 		}
 		iter.remove();
+		this.saved = false;
 	}
 	
 	public void append(char[] chars) {
