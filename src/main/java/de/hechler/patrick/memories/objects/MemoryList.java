@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
@@ -170,11 +171,17 @@ public class MemoryList implements Runnable {
 			this.out.println(msg);
 			throw new ActException(msg);
 		}
-		if (finish) {
-			mem.setFinishDate(date ? Calendar.getInstance() : null);
-		}
+		boolean mod = finish != mem.isFinished();
 		mem.setFinished(finish);
-		this.memories = new TreeSet <>(this.memories);
+		if (date) {
+			Calendar cal = mem.getFinishDate();
+			mem.setFinishDate(finish ? Calendar.getInstance() : null);
+			mod |= Objects.equals(cal, mem.getCreateDate());
+		}
+		if (mod) {
+			this.memories = new TreeSet <>(this.memories);
+			this.saved = false;
+		}
 	}
 	
 	private void lines() {
