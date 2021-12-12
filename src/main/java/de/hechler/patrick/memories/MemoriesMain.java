@@ -19,6 +19,7 @@ public class MemoriesMain {
 				System.out.flush();
 				e.printStackTrace(System.err);
 				System.err.flush();
+				memList.printhelp();
 			}
 		}
 	}

@@ -4,7 +4,7 @@
     
     <groupId>de.hechler.patrick.zeugs</groupId>
     <artifactId>memories</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -30,7 +30,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>8</release>
+					<source>1.8</source>
+					<target>1.8</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -90,12 +91,12 @@
       <repository>
         <id>patmcsreleases</id>
         <name>PatMCS Maven Repository</name>
-        <url>http://patmcs.hechler.de:8080/repository/maven-releases/</url>
+        <url>http://nexuspat.hechler.de/repository/maven-releases/</url>
       </repository>
       <snapshotRepository>
         <id>patmcssnapshots</id>
         <name>PatMCS Maven Snapshots</name>
-        <url>http://patmcs.hechler.de:8080/repository/maven-snapshots/</url>
+        <url>http://nexuspat.hechler.de/repository/maven-snapshots/</url>
       </snapshotRepository>      
     </distributionManagement>
     

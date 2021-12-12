@@ -1,2 +1,2 @@
 # Memories
-to remember what to to
+to remember what to do

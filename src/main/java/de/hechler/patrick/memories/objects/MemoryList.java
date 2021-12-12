@@ -30,7 +30,7 @@ import de.hechler.patrick.zeugs.objects.QuedReaderable;
 
 public class MemoryList implements Runnable {
 	
-	private static final Comparator <Memory> DEFAULT_COMPARATOR = new DefaultMemoryComparator();
+	private static final Comparator <Memory> DEFAULT_COMPARATOR = DefaultMemoryComparator.INSTANCE;
 	
 	private volatile boolean     exit;
 	private PrintStream          out;
@@ -97,7 +97,7 @@ public class MemoryList implements Runnable {
 		if (this.exit) {
 			return;
 		}
-		String str = in.next();
+		String str = this.in.next();
 		try {
 			switch (str.toLowerCase()) {
 			case "exit":
@@ -121,19 +121,91 @@ public class MemoryList implements Runnable {
 			case "show":
 				show();
 				break;
+			case "lines":
+				lines();
+				break;
+			case "finish":
+				finish(true, "date".equalsIgnoreCase(this.in.next()));
+				break;
+			case "unfinish":
+				finish(false, "date".equalsIgnoreCase(this.in.next()));
+				break;
 			case "help":
 				help();
 				break;
-			default:
+			default: {
 				final String msg = "unknown command: '" + str + "'";
 				this.out.println(msg);
 				throw new Exception(msg);
+			}
 			}
 		} catch (Exception | AssertionError e) {
 			this.out.println("there was an exception: " + e.getClass());
 			this.out.println("  msg: " + e.getMessage());
 			throw new ActException(e);
 		}
+	}
+	
+	private void finish(boolean date, boolean finish) {
+		Memory mem = readMemFromIndex();
+		String title = this.in.next();
+		if ( !title.equals(mem.getTitle())) {
+			String msg = "wron title: assertet: " + title + " memt-title: " + mem.getTitle();
+			this.out.println(msg);
+			throw new ActException(msg);
+		}
+		if (date) {
+			mem.setFinishDate(finish ? Calendar.getInstance() : null);
+		}
+		mem.setFinished(finish);
+	}
+	
+	private void lines() {
+		String mode = in.next();
+		Memory mem = readMemFromIndex();
+		boolean mod = false;
+		switch (mode.toLowerCase()) {
+		default:
+			throw new ActException("unknown lies command: '" + mode + "'");
+		case "set":
+			mod = mem.getLines().length != 0;
+			mem.setLines(new String[0]);
+		case "add":
+			String[] oldLines = mem.getLines();
+			List <String> addLinesList = new ArrayList <>();
+			for (String line = this.in.nextLine(); !line.isEmpty(); line = this.in.nextLine()) {
+				addLinesList.add(line);
+			}
+			String[] addLines = addLinesList.toArray(new String[addLinesList.size()]);
+			String[] newLines = new String[oldLines.length + addLines.length];
+			System.arraycopy(oldLines, 0, newLines, 0, oldLines.length);
+			System.arraycopy(addLines, 0, newLines, oldLines.length, addLines.length);
+			mem.setLines(newLines);
+			mod |= addLines.length != 0;
+			if (mod) {
+				mem.setLastModDate(Calendar.getInstance());
+			}
+		}
+	}
+	
+	private Memory readMemFromIndex() {
+		return readMemFromIndex(this.memories.iterator(), this.in.nextInt());
+	}
+	
+	private Memory readMemFromIndex(Iterator <Memory> iter, int index) {
+		Memory mem = null;
+		for (; index >= 0; index -- ) {
+			if ( !iter.hasNext()) {
+				this.getOut().println("I do not have so much elements");
+				throw new ActException("I do not have so much elements");
+			}
+			mem = iter.next();
+		}
+		if (mem == null) {
+			this.getOut().println("illegal index: " + index);
+			throw new ActException("illegal index: " + index);
+		}
+		return mem;
 	}
 	
 	public void printhelp() {
@@ -154,11 +226,23 @@ public class MemoryList implements Runnable {
 		this.out.println("remove <NUMBER> <TITLE>");
 		this.out.println("  to remove the Memory at the index");
 		this.out.println("  if the memory at the index does not have title the operation will fail");
+		this.out.println("finish [date] <NUMBER> <TITLE>");
+		this.out.println("  to finish the Memory at the index");
+		this.out.println("  if the memory at the index does not have title the operation will fail");
+		this.out.println("  if date is set the date will also be savd");
+		this.out.println("unfinish [date] <NUMBER> <TITLE>");
+		this.out.println("  to unfinish the Memory at the index");
+		this.out.println("  if the memory at the index does not have title the operation will fail");
+		this.out.println("  if date is set the date will also be removed (if set)");
 		this.out.println("add <TITLE>");
 		this.out.println("<LINES>");
 		this.out.println("<EMPTY_LINE>");
 		this.out.println("  to add a new memory with the given title");
 		this.out.println("  and the given lines");
+		this.out.println("lines <add | set> <NUMBER>");
+		this.out.println("<LINES>");
+		this.out.println("<EMPTY_LINE>");
+		this.out.println("  to add/set the value-lines of the memory with the given title");
 		this.out.println("print");
 		this.out.println("  to show all memor< titles with there index");
 		this.out.println("exit");
@@ -166,15 +250,7 @@ public class MemoryList implements Runnable {
 	}
 	
 	private void show() {
-		int index = this.in.nextInt();
-		Memory mem = null;
-		for (Iterator <Memory> iterator = this.memories.iterator(); index >= 0; index -- ) {
-			mem = iterator.next();
-		}
-		if (mem == null) {
-			this.out.println("no memory (either your index is negative or my map is currupt)");
-			throw new NullPointerException("no memory (either your index is negative or my map is currupt)");
-		}
+		Memory mem = readMemFromIndex();
 		this.out.println("Memory: " + mem.getTitle());
 		boolean flags = false;
 		this.out.println("  flags:");
@@ -221,7 +297,7 @@ public class MemoryList implements Runnable {
 		if (cal == null) {
 			this.out.println(prefix + "none set");
 		} else {
-			this.out.println(prefix + cal.toInstant().toString());
+			this.out.println(prefix + cal);
 		}
 	}
 	
@@ -355,7 +431,7 @@ public class MemoryList implements Runnable {
 	
 	private void print() {
 		int i = 0;
-		for (Iterator<Memory> iter = this.memories.iterator(); iter.hasNext(); i ++) {
+		for (Iterator <Memory> iter = this.memories.iterator(); iter.hasNext(); i ++ ) {
 			Memory mem = iter.next();
 			Calendar cd = mem.getCreateDate();
 			if (cd == null) {
@@ -385,21 +461,13 @@ public class MemoryList implements Runnable {
 	}
 	
 	private void remove() {
-		int index = this.in.nextInt();
-		final int origI = index;
+		final int index = this.in.nextInt();
 		String title = this.in.next();
-		Memory mem = null;
-		Iterator <Memory> iter;
-		for (iter = memories.iterator(); index >= 0; index -- ) {
-			mem = iter.next();
-		}
-		if (mem == null) {
-			this.out.println("no memory (either your index is negative or my map is currupt)");
-			throw new NullPointerException("no memory (either your index is negative or my map is currupt)");
-		}
+		Iterator <Memory> iter = this.memories.iterator();
+		Memory mem = readMemFromIndex(iter, index);
 		if ( !mem.getTitle().equals(title)) {
-			this.out.println("the memory at the index " + origI + " has not the title " + title);
-			throw new AssertionError("the memory at the index " + origI + " has not the title " + title);
+			this.out.println("the memory at the index " + index + " has not the title " + title);
+			throw new AssertionError("the memory at the index " + index + " has not the title " + title);
 		}
 		iter.remove();
 	}

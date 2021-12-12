@@ -9,6 +9,10 @@ public class DefaultMemoryComparator implements Serializable, Comparator <Memory
 	/** UID */
 	private static final long serialVersionUID = 7047136304627581468L;
 	
+	public static DefaultMemoryComparator INSTANCE = new DefaultMemoryComparator();
+	
+	private DefaultMemoryComparator() {}
+	
 	public int compare(Memory a, Memory b) {
 		int cmp = defaultCompare(a.getFinishDate(), b.getFinishDate());
 		if (cmp == 0) {

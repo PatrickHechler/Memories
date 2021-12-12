@@ -78,11 +78,11 @@ public class Memory implements Serializable {
 	}
 	
 	public void setLines(String[] lines) {
-		this.lines = Objects.requireNonNull(lines);
+		this.lines = Objects.requireNonNull(lines, "no null value allowed");
 	}
 	
 	public void setTitle(String title) {
-		this.title = Objects.requireNonNull(title);
+		this.title = Objects.requireNonNull(title, "no null title allowed");
 	}
 	
 	public boolean isFinished() {
